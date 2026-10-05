@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A paper-only AI ranking of the ICML 2026 accepted corpus.">
+    <title>AI as Area Chair | ICML 2026</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="wordmark" href="#story" aria-label="AI as Area Chair home">
+        <span class="wordmark-mark">AC</span>
+        <span>AI as Area Chair</span>
+      </a>
+      <nav class="view-tabs" aria-label="Report views">
+        <button class="view-tab is-active" type="button" data-view="story">The experiment</button>
+        <button class="view-tab" type="button" data-view="awards">AI awards</button>
+      </nav>
+      <a class="repo-link" href="https://github.com/shayne-longpre/icml-ai-ac" target="_blank" rel="noreferrer">
+        Repository
+      </a>
+    </header>
+
+    <main>
+      <section id="story-view" class="view is-active" data-view-panel="story">
+        <article>
+          <header class="article-hero">
+            <h1>AI as Area Chair: What Science Would AI Send to ICML?</h1>
+            <p class="dek">
+              We had language models act as an area chair (AC) by ranking 6,617 papers accepted to ICML 2026.
+              Then, we compared this ranking against the decisions made by human ACs (which papers received orals and spotlights) and found notable differences.
+            </p>
+            <aside class="tldr" aria-label="Summary">
+              <p class="tldr-label">TL;DR</p>
+              <ul>
+                <li>
+                  <b>Finding 1</b>: The overall ranking correlation is very low (Kendall's &tau; = 0.08). Only a quarter of ICML oral papers (decided by human ACs) were in the AI ACs' top 10%.
+                </li>
+                <li>
+                  <b>Finding 2</b>: AI and humans prefer different kinds of papers. For instance, among all ICML orals and spotlights (N = 536), 11.2% are application papers, while AI ACs included only 1.5% of such papers in their top 536. Compared with human ACs, AI ACs also favored more papers on core ML algorithms, safety and evaluation, and infrastructure.
+                </li>
+                <li>
+                  <b>Finding 3</b>: The rankings of four different AI models agree with each other (&rho; = 0.62) far more than with human reviewer scores (&rho; &le; 0.10).
+                </li>
+                <li>
+                  <b>Finding 4</b>: When we looked into the justifications behind the AI ACs' rankings, they often mentioned how impactful they predicted the paper would be in the field. In contrast, humans cared more about the novelty of the method itself than about predicted impact.
+                </li>
+              </ul>
+            </aside>
+          </header>
+
+          <div class="paper-mosaic-band">
+            <div id="paper-mosaic" class="paper-mosaic"></div>
+            <p class="mosaic-caption">
+              The five papers that AI ACs ranked highest out of all 6,617 papers. The ranking comes from our six-stage pipeline described below. Note that we didn't show the models the author names, human reviews, or acceptance decisions during this ranking procedure.
+            </p>
+          </div>
+
+          <section class="article-section opening-section">
+            <p class="dek">
+              <b>Motivation</b>
+            </p>
+            <p>
+              AI systems, referred to as "research agents" or "AI scientists", now take part in several steps of research, from
+              <a href="https://arxiv.org/abs/2506.13131" target="_blank" rel="noreferrer">searching for better algorithms</a>
+              to <a href="https://arxiv.org/abs/2408.06292" target="_blank" rel="noreferrer">drafting entire papers (autoresearch)</a>.
+              As more of that process is automated, we want to have a better understanding of what kind of research
+              these systems "prefer", how their preferences differ from those of humans, and the reasons behind these preferences.
+              In other words, we want to understand whether their research taste is similar to or different from that of humans!
+            </p>
+            <p>
+              However, research taste is hard to study in most cases, because it is not well documented (e.g., humans rarely leave artifacts like "I prefer this kind of research over others") and it is hard to quantify (e.g., how similar or different two researchers' tastes are).
+            </p>
+            <p>
+              Conference review is one of the few places where research is compared explicitly and the outcome is written down: papers are scored,
+              and a small share are chosen as orals, spotlights, or award papers. Just as a human AC reads a set of papers, weighs them
+              against each other, and decides which should receive orals and spotlights, we had a panel of AI models
+              rank every paper accepted to ICML 2026. The result is a single ranking of all
+              6,617 papers, which we then compared with human ACs' decisions.
+            </p>
+          </section>
+
+          <section class="method-band">
+            <div class="section-heading">
+              <span class="section-number">01</span>
+              <div>
+                <h2>How we built the ranking</h2>
+              </div>
+            </div>
+            <div id="method-diagram" class="method-diagram" aria-label="Ranking pipeline"></div>
+            <p class="method-note">
+              Having a frontier model compare all 6,617 papers directly would be very expensive, so
+              we adopted a multi-stage pipeline. In the early stages, cheaper models narrow the pool, and
+              in the later stages, more capable models spend more effort on fewer papers. The diagram
+              shows the six stages and how many papers enter each one.
+            </p>
+            <ul class="stage-list">
+              <li>
+                <p class="stage-head">
+                  <span class="stage-label">Stage 01</span>
+                  <span class="stage-flow">6,617 papers</span>
+                </p>
+                <p class="stage-body">
+                  <strong>Anonymize and label.</strong> We keep the first nine pages of each paper
+                  (the main text) and remove author names, affiliations, acknowledgements, and
+                  similar identifying text. Gemini 3.1 Flash Lite then labels each paper's
+                  contribution type, such as algorithm, theory, benchmark, or application. Later
+                  stages use the labels to mix types within each batch and to keep every type
+                  represented at each cut. No paper is removed here.
+                </p>
+              </li>
+              <li>
+                <p class="stage-head">
+                  <span class="stage-label">Stage 02</span>
+                  <span class="stage-flow">6,617 &rarr; 1,442</span>
+                </p>
+                <p class="stage-body">
+                  <strong>First-pass ranking.</strong> Four inexpensive models (Nemotron 3 Ultra,
+                  Gemini 3.5 Flash Lite, GPT-5.6 Luna, and Grok 4.3) rank papers in batches of
+                  eight. Every paper appears in two different, randomly drawn batches, so each model
+                  compares it against two different sets of seven other papers. That gives eight
+                  rankings per paper. About the top fifth (1,442 papers) moves on. We kept this cut
+                  generous because a paper dropped here cannot come back.
+                </p>
+              </li>
+              <li>
+                <p class="stage-head">
+                  <span class="stage-label">Stage 03</span>
+                  <span class="stage-flow">1,442 &rarr; 250</span>
+                </p>
+                <p class="stage-body">
+                  <strong>Second-pass ranking.</strong> GPT-5.6 Terra and Claude Sonnet 5 rank the
+                  remaining papers with the same batch design, and we average their normalized
+                  ranks. The finalists are the top of this ranking plus the leading papers of each
+                  contribution type and papers on which the two models, or the two stages,
+                  disagreed. That gives 250 finalists.
+                </p>
+              </li>
+              <li>
+                <p class="stage-head">
+                  <span class="stage-label">Stage 04</span>
+                  <span class="stage-flow">250 &rarr; 172</span>
+                </p>
+                <p class="stage-body">
+                  <strong>Full-paper judgments.</strong> GPT-5.6 Sol, Claude Fable 5, and Gemini 3.1
+                  Pro each read every finalist as a PDF, figures and tables included, and write a
+                  structured judgment with scores on six axes, the strongest case for the paper's
+                  impact, and its main risk (750 judgments in all). We order the finalists two ways,
+                  by averaging the three models' scores and by having GPT-5.6 Sol rank all 250 from
+                  the judgments, and keep the union of the two top-150 lists, 172 papers. From here
+                  on, papers are compared through these written judgments instead of the PDFs.
+                </p>
+              </li>
+              <li>
+                <p class="stage-head">
+                  <span class="stage-label">Stage 05</span>
+                  <span class="stage-flow">172 &rarr; 60</span>
+                </p>
+                <p class="stage-body">
+                  <strong>Swiss-system rounds.</strong> GPT-5.6 Sol compares papers two at a time,
+                  reading both papers' judgments and picking the one it expects to have more impact.
+                  As in a Swiss-system chess tournament, each round pairs papers with similar records
+                  so far. After 10 rounds (860 comparisons), the top 60 advance.
+                </p>
+              </li>
+              <li>
+                <p class="stage-head">
+                  <span class="stage-label">Stage 06</span>
+                  <span class="stage-flow">60 papers</span>
+                </p>
+                <p class="stage-body">
+                  <strong>Round robin.</strong> GPT-5.6 Sol compares every pair of the 60 remaining
+                  papers, 1,770 comparisons in all, and orders them by number of wins. This is the
+                  final ranking shown in Section 2.
+                </p>
+              </li>
+            </ul>
+            <p class="method-note">
+              <strong>What the models could see.</strong> Note that during all the stages, the AI
+              models had no access to web search, retrieval, or other tools, and the prompts told
+              them not to use outside knowledge about the paper or its authors. We also never
+              included the reviews, scores, acceptance decisions, or presentation tiers
+              (oral/spotlight/poster) in their inputs. A model could still have recognized a paper
+              from its training data (memorization), which we return to in Section 5.
+            </p>
+          </section>
+
+          <section class="article-section">
+            <div class="section-heading">
+              <span class="section-number">02</span>
+              <div>
+                <h2>The AI's top ten</h2>
+              </div>
+            </div>
+            <p class="section-lede">
+              These are the first ten papers in the final round robin (Stage 06). Under each title is a
+              one-line summary of the models' reasoning, followed by what humans (at ICML 2026) decided: the paper's
+              presentation tier and its mean reviewer score. Four of the ten were orals or
+              spotlights at ICML.
+            </p>
+            <div class="score-key">
+              <p id="reviewer-scale-caption" class="score-key-caption"></p>
+              <div id="reviewer-scale" class="score-key-table"></div>
+            </div>
+            <div class="top-ten-head">
+              <span>AI rank</span>
+              <span>Paper</span>
+            </div>
+            <div id="top-ten" class="top-ten"></div>
+            <button class="text-action" type="button" data-go-awards>
+              See the complete AI awards and oral program
+            </button>
+          </section>
+
+          <section class="results-band">
+            <div class="section-heading">
+              <span class="section-number">03</span>
+              <div>
+                <h2>The AI's ranking and human's ranking on ICML papers agree only weakly</h2>
+              </div>
+            </div>
+            <div class="evidence-block">
+              <p class="evidence-label">Finding 1</p>
+              <h3 class="evidence-heading">The rank correlation with ICML is positive but small</h3>
+              <div id="correlation-scale" class="chart-scroll"></div>
+              <p class="evidence-body">
+                ICML records two judgments of each accepted paper: its presentation tier (a small
+                number of orals, a larger group of spotlights, and posters for the rest) and the mean
+                score from its reviewers. We compare the AI ranking with each using Kendall's &tau;,
+                which looks at every pair of papers and asks whether the AI and ICML put the pair in
+                the same order. A
+                value of 0 means no relationship and 1 means identical orderings. Against both of
+                ICML's records the AI ranking gets 0.08.
+              </p>
+              <div id="recall-by-tier" class="chart-scroll"></div>
+              <p class="evidence-body">
+                The AI ranking orders all 6,341 main-track papers, so its top tenth is 634 papers.
+                The dashed line (10%) is a random baseline of AI ACs ordering the papers randomly. 
+                As shown in the figure, P(human="oral" | AI="top 10%") is 25.2% and P(human AC="spotlight" | AI AC="top 10%") is 16.7%. Hence, the relationship is real but weak: three quarters of ICML's orals are outside
+                the AI's top tenth.
+              </p>
+              <div id="reviewer-vs-rank" class="chart-scroll"></div>
+              <p class="evidence-body">
+                This figure does the same for reviewer scores, which are finer-grained than the
+                three tiers (spotlight/oral/poster). The vertical axis is the average position in the AI ranking as a
+                percentile, where 100 is the top. Papers with a mean reviewer score of 3.25 (between
+                weak reject and weak accept) sit at the 44th percentile on average, and papers with
+                5.25 (just above accept) sit at the 61st. Better-reviewed papers do rank higher with
+                the AI, but going from the lowest mean scores to the highest moves a paper less than
+                18 percentile points on average.
+              </p>
+            </div>
+
+            <div class="evidence-block">
+              <p class="evidence-label">Finding 2</p>
+              <h3 class="evidence-heading">AI and humans favor different kinds of papers</h3>
+              <div id="preference-comparison" class="preference-panel"></div>
+              <p class="evidence-body">
+                A low correlation could come from noise as much as from different preferences, so
+                we also compare what each side picked. We take the 536 papers ICML chose as orals or
+                spotlights (top 10% papers) and the AI's top 536, and compare their contribution types using the
+                Stage 01 labels. Relative to ICML's picks, the AI's contain more core ML algorithms,
+                more safety and evaluation work, and more infrastructure. ICML's contain more theory,
+                more analysis and position papers, and many more application papers (11% against
+                1.5%). Both sets have fewer application papers than the main track as a whole (19%),
+                but the AI's set almost drops them.
+              </p>
+            </div>
+
+            <div class="evidence-block">
+              <p class="evidence-label">Finding 3</p>
+              <h3 class="evidence-heading">The models agree with each other far more than with the reviewers</h3>
+              <div id="model-agreement" class="figure-panel"></div>
+              <p class="evidence-body">
+                The four Stage 02 models come from four different organizations. Across the 6,341
+                main-track papers, their rankings correlate with each other at 0.62 on average
+                (Spearman's &rho;), and the least similar pair still reaches 0.57. Each of them
+                correlates with the mean reviewer score at between 0.07 and 0.10.
+              </p>
+              <div id="within-batch" class="figure-panel"></div>
+              <p class="evidence-body">
+                Because the models ranked papers in the same batches of eight, part of their
+                agreement could come from sharing a batch layout rather than a judgment. To check,
+                we look inside single batches, where every model saw exactly the same eight papers,
+                and compare each model's order with the other models' orders and with the reviewer
+                scores of those eight papers. Within a batch, models from different companies agree
+                at 0.43 on average, and models agree with the reviewers at 0.07, so the gap remains
+                when the context is identical. The agreement is also close to its ceiling. A model's
+                two rankings of the same papers, made in two different batches, correlate at 0.51,
+                and its ranking correlates with another company's model at 0.47.
+              </p>
+              <p class="evidence-body">
+                <b>Why would models from different companies agree so much more with each other than
+                with reviewers?</b> The models were trained on much of the same text and tuned in similar ways, so they may
+                share a view of what good ML research looks like. They also received the same
+                prompt, which pulls their rankings together. And the reviewer score is a noisy
+                target. Each paper is scored by three or four people with different backgrounds and
+                priorities, and when two independent committees reviewed the same NeurIPS 2021
+                submissions, they disagreed on 23% of accept/reject decisions
+                (<a href="https://arxiv.org/abs/2306.03262" target="_blank" rel="noreferrer">Beygelzimer et al., 2023</a>).
+                Within accepted papers, reviewer scores also span a narrow range, which makes any
+                correlation with them harder to detect. Still, the pattern is informative: human
+                reviewers disagree with each other in many directions, while the models disagree
+                with the reviewers in largely the same direction.
+              </p>
+            </div>
+
+          </section>
+
+          <section class="article-section">
+            <div class="section-heading">
+              <span class="section-number">04</span>
+              <div>
+                <h2>The AI ranks on predicted impact; reviewer scores track novelty</h2>
+              </div>
+            </div>
+            <div class="evidence-block">
+              <p class="evidence-label">Finding 4</p>
+              <h3 class="evidence-heading">AI ACs care most about "prediction of impact" and this doesn't correlate to the human reviewer scores</h3>
+            <!-- Renders only when data.js carries judgmentBasis, which requires rebuilding
+                 with --data-root pointed at the analysis bundle. -->
+            <div id="axis-weights" class="figure-panel"></div>
+            <p class="finding-body">
+              In Stage 04, the three frontier models scored 248 papers on
+              six axes, along with an overall score. Also, we have the overall score given by human reviewers.
+              With these, we measure two things: (1) the correlation between AI ACs' score on each axis and the overall score given by AI AC, and 
+              (2) the correlation between AI ACs' score on each axis and the overall score given by human reviewers.
+              "Prediction of field impact" correlates most with the AI's overall score (0.80) and least
+              with the human reviewer score (0.06, with a 95% interval that includes zero). Interestingly, "novelty of the method" shows the opposite trend: it
+              correlates most with the reviewer score (0.24) and ranks fifth of six on the AI side.
+            </p>
+            <div id="reason-axes" class="figure-panel"></div>
+            <p class="finding-body">
+              The 248 finalists are a small slice of the corpus that the AI had already filtered, so
+              we also checked whether the same pattern holds across all 6,341 main-track papers. The
+              Stage 02 models wrote short reasons for and against each of these papers, and we
+              matched the reasons against keyword patterns for six recurring arguments. The most
+              common objection is that a result may not hold beyond the setting where it was shown,
+              that is, that its impact will stay local. At least one model raised it for 74% of
+              papers. The more models raise it, the lower the paper ranks: its average position
+              falls from the 53rd percentile when no model raises it to the 43rd when all four do.
+              It does not track
+              ICML's decisions, though. Three or more models raised it for 22.0% of orals, 15.1% of
+              spotlights, and 18.4% of posters. The other five arguments show the same pattern. Each
+              is more strongly related to the AI ranking than to the reviewer score, whether it
+              counts for a paper or against it.
+            </p>
+            </div>
+
+            <div class="divergence-block">
+              <h3>Six papers where the AI and ICML disagreed most</h3>
+              <p class="divergence-intro">
+                Across the main track, 531 papers that ICML made posters reached the AI's top tenth,
+                and 35 papers that ICML made orals or spotlights fell into its bottom tenth. The
+                table shows the three most extreme cases in each direction, with each paper's
+                position in the AI ranking of all 6,341 main-track papers and one sentence from the
+                models' reasoning.
+              </p>
+              <div id="divergence-table" class="divergence-table-wrap"></div>
+              <p class="divergence-note">
+                In both directions the reasons are about reach. The three papers the AI ranked high
+                are credited with general theory, broad empirical claims, and consequences for the
+                field. The three it ranked low are faulted for combining existing techniques, for not
+                transferring beyond one family of benchmarks, and for depending on datasets built
+                for the paper. Another of the eight judgments of PhenoBrain says its impact is
+                "primarily in clinical neuroscience, not general ML", and ICML chose it as an oral.
+              </p>
+            </div>
+
+          </section>
+
+          <section class="closing-band">
+            <div class="section-heading">
+              <span class="section-number">05</span>
+              <div>
+                <h2>Limitations</h2>
+              </div>
+            </div>
+            <p class="purpose-lede">
+              This is a pilot study on one conference, and the comparison has weaknesses that
+              readers should keep in mind. We were not trying to build a replacement for area
+              chairs, and the ranking should not be used as one.
+            </p>
+            <ul class="limitations-list">
+              <li><strong>The models may have recognized some papers.</strong> The models had no
+                web search, author names were removed, and the prompts told them not to use outside
+                knowledge. Even so, papers that circulated widely as preprints, including our
+                top-ranked one, may be in the models' training data together with the discussion
+                around them. We did not test for this. A natural next step is to control for how well
+                known a paper was before the conference, for example through social media attention
+                or the prominence of its lead authors, and check whether the ranking changes.</li>
+              <li><strong>The human side is not ground truth.</strong> Presentation tier and
+                reviewer score are different signals, and a ranking can move toward one while moving
+                away from the other. Both are noisy: reviewers of the same paper often disagree, and
+                a few weak reviews can decide a paper's tier. Readers who trust conference reviews
+                less should read our agreement numbers as a comparison between two imperfect
+                rankings, not as a measure of the AI's accuracy.</li>
+              <li><strong>The ranking is sensitive to presentation order.</strong> In Stage 02,
+                three of the four models favored whichever of two papers came earlier in a batch.
+                Correcting for this moves the average paper 230 places and keeps only 23 of the
+                original top 50, which is why Stage 02 advanced papers from both the raw and the
+                corrected ranking.</li>
+              <li><strong>The models may rely on shortcuts.</strong> A ranking can line up with
+                outcomes for reasons unrelated to research quality, such as subfield, writing style,
+                or formatting. We have not checked which surface features the models respond
+                to.</li>
+              <li><strong>The ranking is a diagnostic, not a target.</strong> If papers were
+                optimized against a judge like ours, their scores would likely rise without the
+                research getting better, as Goodhart's law predicts, and
+                <a href="https://arxiv.org/abs/2606.13044" target="_blank" rel="noreferrer">recent work</a>
+                shows that AI reviewers can be swayed by presentation-only edits. We have not run
+                this test on our own pipeline.</li>
+              <li><strong>Accepted papers only, at one moment.</strong> We ranked papers ICML had
+                already accepted, so we cannot say anything about accept or reject decisions. The
+                results also depend on these particular models and should be rerun as models and
+                conferences change.</li>
+              <li><strong>Judging finished papers is one kind of taste.</strong> We studied how
+                models evaluate completed work against shared criteria. Choosing what to work on,
+                which prior work to build on, and when to change direction happen earlier and may
+                call on different skills, so doing well at one does not imply doing well at the
+                other.</li>
+            </ul>
+
+            <div class="conclusion-block">
+              <div class="section-heading">
+                <span class="section-number">06</span>
+                <div>
+                  <h2>Our position: research needs varied taste</h2>
+                </div>
+              </div>
+              <p class="conclusion-body conclusion-body-first">
+                As research agents take on more of the work of choosing and judging research, our main concern is that
+                they will all apply roughly the same taste, whatever its quality.
+              </p>
+              <p class="conclusion-body">
+                A research field covers a lot of ground because its members choose problems for
+                unrelated reasons: where they trained, what data or equipment they have, who they
+                work with, and sometimes a stubborn belief in an idea others dismissed. Most of these
+                bets do not pay off, and it is hard to tell in advance which ones will. Having many
+                independent bets is how a field finds the ones that do.
+              </p>
+              <p class="conclusion-body">
+                Our results suggest that current models do not supply that kind of independence.
+                Four models from four companies ranked the same papers much more like each other than
+                like the reviewers, and a model's ranking agreed with another company's model almost
+                as well as with its own second attempt. If many researchers ask models what to work
+                on or which papers matter, their choices become correlated even when each answer is
+                reasonable on its own. This is the concern behind work on algorithmic monoculture
+                (<a href="https://www.pnas.org/doi/10.1073/pnas.2018340118" target="_blank" rel="noreferrer">Kleinberg and Raghavan, 2021</a>;
+                <a href="https://arxiv.org/abs/2211.13972" target="_blank" rel="noreferrer">Bommasani et al., 2022</a>)
+                and on monocultures in AI-assisted science
+                (<a href="https://www.nature.com/articles/s41586-024-07146-0" target="_blank" rel="noreferrer">Messeri and Crockett, 2024</a>).
+                It is also close to the case for pluralistic alignment
+                (<a href="https://arxiv.org/abs/2402.05070" target="_blank" rel="noreferrer">Sorensen et al., 2024</a>),
+                which argues that models should represent the range of views people hold rather than
+                a single one.
+              </p>
+              <p class="conclusion-body">
+                The kind of taste the models share matters as well. Near the top of our ranking,
+                the models favored papers that change how we understand a prominent method or
+                metric within the current framing of a problem. Spurious Rewards, ranked first,
+                shows that a widely used RL recipe can raise math benchmark scores for some models
+                even with random rewards. This is close to what Kuhn called normal science, and since
+                most papers are normal science, it is a reasonable thing to reward. But conferences
+                also exist to surface other kinds of contribution, such as a new framing of a problem
+                or a result that matters to a small community, and a single ranking built on
+                forecast impact will tend to miss them.
+              </p>
+              <p class="conclusion-body">
+                What could help? On the model side, instead of having a few commercial models debate
+                each other, one could train or condition smaller models on different slices of the
+                literature and different research histories, so that they disagree for reasons
+                closer to the ones people have, and then study how they interact. Whether that
+                produces varied taste or only varied noise is an open question that we think is
+                worth testing. On the human side, researchers who work on what the models rank low,
+                such as results that may not generalize, problems that matter to a small community,
+                or payoffs that take years, supply something the models currently do not.
+              </p>
+              <p class="conclusion-body">
+                Finally, we measured taste in evaluation, where finished papers are judged against
+                shared criteria. Conference review already combines several reviewers per paper,
+                partly because evaluation tastes differ. Taste in formation, meaning which problem to
+                pursue, which prior work to build on, and when to pivot, comes before any results
+                exist and probably matters more for where a field goes. We do not know whether models
+                that agree in evaluation also agree in formation, and that is the question we most
+                want to answer next. To make follow-up work easier, we are releasing the full
+                ranking, the intermediate judgments, and the code.
+              </p>
+            </div>
+            <div class="source-links">
+              <a href="https://github.com/shayne-longpre/icml-ai-ac/blob/main/docs/stage7_human_comparison.md" target="_blank" rel="noreferrer">Detailed results</a>
+              <a href="https://github.com/shayne-longpre/icml-ai-ac/blob/main/docs/final_pipeline_methodology.md" target="_blank" rel="noreferrer">Methodology</a>
+              <a href="https://github.com/shayne-longpre/icml-ai-ac" target="_blank" rel="noreferrer">Code and artifacts</a>
+            </div>
+          </section>
+        </article>
+      </section>
+
+      <section id="awards-view" class="view" data-view-panel="awards" hidden>
+        <header class="awards-hero">
+          <div class="article-meta">
+            <span>Mock conference program</span>
+            <span>Frozen July 30, 2026</span>
+          </div>
+          <h1>The ICML awards AI would have announced</h1>
+          <p class="dek">
+            A counterfactual awards slate taken directly from the final paper-only ranking.
+          </p>
+          <div class="rule-note">
+            <strong>Program rule</strong>
+            <span>Ranks 1–2: Outstanding Papers</span>
+            <span>Ranks 3–7: Honorable Mentions</span>
+            <span>Ranks 1–60: AI Orals</span>
+          </div>
+        </header>
+
+        <section class="award-section outstanding-section">
+          <div class="section-heading">
+            <span class="section-number">AI</span>
+            <div>
+              <h2>Outstanding Papers</h2>
+            </div>
+          </div>
+          <div id="outstanding-papers" class="outstanding-papers"></div>
+        </section>
+
+        <section class="award-section mention-section">
+          <div class="section-heading">
+            <span class="section-number">05</span>
+            <div>
+              <h2>Honorable Mentions</h2>
+            </div>
+          </div>
+          <div id="honorable-mentions" class="honorable-mentions"></div>
+        </section>
+
+        <section class="oral-section">
+          <div class="oral-header">
+            <div class="section-heading">
+              <span class="section-number">60</span>
+              <div>
+                <h2>AI Oral Program</h2>
+              </div>
+            </div>
+            <p>
+              The 60 papers from the final round robin, in which every pair was compared directly.
+              ICML's decisions are shown for reference only; the models never saw them.
+            </p>
+          </div>
+          <div class="oral-controls">
+            <label>
+              <span>Search papers</span>
+              <input id="oral-search" type="search" placeholder="Title or paper ID" autocomplete="off">
+            </label>
+            <label>
+              <span>Contribution type</span>
+              <select id="oral-class-filter">
+                <option value="">All contribution types</option>
+              </select>
+            </label>
+            <div id="oral-result-count" class="result-count" aria-live="polite"></div>
+          </div>
+          <div id="oral-list" class="oral-list"></div>
+        </section>
+
+        <footer class="awards-footer">
+          <p>
+            This is a research artifact, not an official ICML decision. The AI awards were assigned
+            mechanically from the frozen final ranking, and ICML's actual outcomes were never part of
+            the model inputs.
+          </p>
+          <button class="text-action" type="button" data-go-story>Read the experiment</button>
+        </footer>
+      </section>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

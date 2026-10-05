@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "icml-ai-ac"
+version = "0.1.0"
+description = "Infrastructure for a public-paper ICML AI executive AC study."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pymupdf>=1.26,<2",
+]
+
+[project.scripts]
+icml-ai-ac = "icml_ai_ac.cli:main"
+icml-ai-ac-repro = "icml_ai_ac.reproducibility:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["icml_ai_ac*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

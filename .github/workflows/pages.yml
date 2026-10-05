@@ -1,0 +1,58 @@
+# Publishes the static blog in site/ to GitHub Pages.
+#
+# There is deliberately no data build step here. site/data.js is committed and
+# frozen, and regenerating it needs the multi-gigabyte experiment bundle that is
+# not in this repository, so the workflow only ever ships what is checked in.
+name: Deploy blog to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deploy finish rather than cancelling it midway.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the frozen data bundle is present
+        run: |
+          test -s site/data.js
+          grep -q 'ICML_AI_AC_DATA' site/data.js
+          test -d site/assets
+
+      - name: Assemble the site
+        run: |
+          mkdir -p _site
+          cp site/index.html site/styles.css site/app.js site/data.js _site/
+          cp -R site/assets _site/assets
+          # Serve the files as-is instead of letting Jekyll rewrite them.
+          touch _site/.nojekyll
+
+      # enablement turns Pages on via the API if it has never been enabled, so a
+      # fresh fork does not need anyone to flip the setting by hand first.
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

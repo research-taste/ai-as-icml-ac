@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+.env
+.env*
+!.env.example
+dist/
+build/
+output/
+tmp/
+.DS_Store
+*.egg-info/
+
+# Generated crawl/model artifacts can become large.
+data/**
+!data/
+!data/**/
+!data/**/.gitkeep
+
+icml_2026_reproducibility/
+results/

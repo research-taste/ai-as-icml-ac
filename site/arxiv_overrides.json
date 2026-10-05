@@ -1,0 +1,26 @@
+{
+  "60565": {
+    "arxiv_id": "2603.03482",
+    "basis": "Same authors and work; the arXiv version is titled 'Beyond Pixel Histories: World Models with Persistent 3D State'."
+  },
+  "60727": {
+    "arxiv_id": "2603.03276",
+    "basis": "Same author group and study; the arXiv version is titled 'Beyond Language Modeling: An Exploration of Multimodal Pretraining'."
+  },
+  "61770": {
+    "arxiv_id": "2312.08472",
+    "basis": "Exact paper title and author group; the preprint predates the automatic resolver's 2024 date floor."
+  },
+  "62240": {
+    "arxiv_id": "2601.18089",
+    "basis": "Same 16 authors and abstract; the arXiv version is titled 'LatentMoE: Toward Optimal Accuracy per FLOP and Parameter in Mixture of Experts'."
+  },
+  "62479": {
+    "arxiv_id": "2604.27147",
+    "basis": "Same five authors and method; the arXiv version is titled 'How to Guide Your Flow: Few-Step Alignment via Flow Map Reward Guidance'."
+  },
+  "66382": {
+    "arxiv_id": "2506.01928",
+    "basis": "Same authors and abstract; the arXiv version adds the subtitle 'A Family of Any-Order Diffusion LLMs'."
+  }
+}
