@@ -534,7 +534,7 @@ a {
 
 .score-key {
   max-width: 640px;
-  margin: 30px 0 0;
+  margin: 30px auto 0;
   padding: 18px 20px 12px;
   border: 1px solid var(--line);
   background: var(--soft);
@@ -1839,8 +1839,8 @@ a {
   font-style: italic;
 }
 
+/* Full column width, like the Finding 2 table, so it stays centered under the prose. */
 .divergence-table-wrap {
-  max-width: 840px;
   margin: 26px 0 0;
   overflow-x: auto;
 }
@@ -1867,7 +1867,7 @@ a {
   text-align: left;
 }
 
-.divergence-group th {
+.divergence-table .divergence-group th {
   padding: 22px 0 8px;
   color: var(--red-dark);
   font-size: 11px;
@@ -1918,10 +1918,10 @@ a {
   overflow-x: auto;
 }
 
-/* Section 04 figures. Each is drawn at 840px so it lines up with the prose column. */
+/* Section 03 and 04 figures, drawn at 840px and centered in the wider column. */
 .figure-panel {
   max-width: 840px;
-  margin: 26px 0 30px;
+  margin: 26px auto 30px;
   overflow-x: auto;
 }
 

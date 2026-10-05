@@ -119,7 +119,7 @@
         .join(". "),
     });
     svg.append(
-      svgElement("text", { class: "evidence-axis-title", x: 160, y: 30 }, "Kendall's τ between the AI ranking and each of ICML's records"),
+      svgElement("text", { class: "evidence-axis-title", x: left, y: 30 }, "Kendall's τ between the AI ranking and each of ICML's records"),
     );
 
     [0, 0.25, 0.5, 0.75, 1].forEach((value) => {
@@ -210,8 +210,8 @@
     const points = evidence.reviewerVsRank;
     const width = 1120;
     const height = 340;
-    const left = 300;
-    const right = 1040;
+    const left = 255;
+    const right = 995;
     const top = 70;
     const bottom = 268;
     const minScore = Math.min(...points.map((p) => p.reviewerScore));
@@ -367,9 +367,9 @@
 
     const width = 840;
     const height = 470;
-    const labelEdge = 300;
-    const leftColumn = 400;
-    const rightColumn = 700;
+    const labelEdge = 240;
+    const leftColumn = 340;
+    const rightColumn = 640;
     const top = 96;
     const bottom = 410;
     const ceiling = 0.85;
@@ -402,7 +402,7 @@
       );
     });
     svg.append(
-      svgElement("text", { class: "evidence-row-sub", x: width - 8, y: y(0.85) - 6, "text-anchor": "end" }, "rank correlation"),
+      svgElement("text", { class: "evidence-row-sub", x: rightColumn + 132, y: y(0.85) - 6, "text-anchor": "end" }, "rank correlation"),
     );
 
     const labelY = spreadLabels(weights.axes.map((axis) => y(axis.ai) + 5), 19);

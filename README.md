@@ -407,4 +407,4 @@ https://arxiv.org/abs/2504.09737
 
 ## Repository
 
-Repository: [github.com/shayne-longpre/icml-ai-ac](https://github.com/shayne-longpre/icml-ai-ac)
+Repository: [github.com/research-taste/ai-as-icml-ac](https://github.com/research-taste/ai-as-icml-ac)
