@@ -161,7 +161,6 @@ a {
 }
 
 .dek {
-  max-width: 790px;
   margin: 30px 0 0;
   color: #3d3d3d;
   font-family: Georgia, "Times New Roman", serif;
@@ -170,7 +169,6 @@ a {
 }
 
 .tldr {
-  max-width: 790px;
   margin: 36px 0 0;
   padding: 22px 26px;
   border-left: 3px solid var(--red);
@@ -520,7 +518,6 @@ a {
 }
 
 .section-lede {
-  max-width: 760px;
   margin: 0;
   color: #464646;
 }
@@ -999,7 +996,6 @@ a {
 
 .divergence-intro,
 .divergence-note {
-  max-width: 840px;
   margin: 0;
   color: #464646;
 }
@@ -1081,7 +1077,6 @@ a {
 }
 
 .purpose-lede {
-  max-width: 940px;
   margin: 0;
   color: #f2f2f2;
   font-family: Georgia, "Times New Roman", serif;
@@ -1090,7 +1085,6 @@ a {
 }
 
 .limitations-list {
-  max-width: 980px;
   margin: 46px 0 0;
   padding: 0;
   color: #d4d4d4;
@@ -1119,7 +1113,6 @@ a {
 }
 
 .conclusion-body {
-  max-width: 940px;
   margin: 28px 0 0;
   color: #d4d4d4;
   font-family: Georgia, "Times New Roman", serif;
@@ -1128,7 +1121,6 @@ a {
 }
 
 .conclusion-body-first {
-  max-width: 980px;
   margin: 0;
   padding: 22px 0 22px 26px;
   border-left: 3px solid var(--red);
@@ -1701,7 +1693,6 @@ a {
 }
 
 .finding-body {
-  max-width: 900px;
   margin: 0 0 16px;
   color: #464646;
 }
